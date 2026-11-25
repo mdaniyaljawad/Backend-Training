@@ -1,0 +1,19 @@
+                                                                    QUERY PLAN                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=100.22..100.32 rows=40 width=33) (actual time=0.221..0.224 rows=39 loops=1)
+   Sort Key: inspected_on DESC
+   Sort Method: quicksort  Memory: 27kB
+   Buffers: shared hit=42 read=2
+   ->  Bitmap Heap Scan on inspections  (cost=4.70..99.15 rows=40 width=33) (actual time=0.051..0.179 rows=39 loops=1)
+         Recheck Cond: ((car_id = 42) AND ((result)::text = 'fail'::text))
+         Heap Blocks: exact=39
+         Buffers: shared hit=39 read=2
+         ->  Bitmap Index Scan on idx_inspections_car_id_result_date  (cost=0.00..4.69 rows=40 width=0) (actual time=0.042..0.043 rows=39 loops=1)
+               Index Cond: ((car_id = 42) AND ((result)::text = 'fail'::text))
+               Buffers: shared read=2
+ Planning:
+   Buffers: shared hit=140 read=1
+ Planning Time: 0.581 ms
+ Execution Time: 0.279 ms
+(15 rows)
+

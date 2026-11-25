@@ -1,0 +1,16 @@
+                                                   QUERY PLAN                                                   
+----------------------------------------------------------------------------------------------------------------
+ Sort  (cost=468.06..468.16 rows=40 width=33) (actual time=1.853..1.856 rows=39 loops=1)
+   Sort Key: inspected_on DESC
+   Sort Method: quicksort  Memory: 27kB
+   Buffers: shared hit=170
+   ->  Seq Scan on inspections  (cost=0.00..467.00 rows=40 width=33) (actual time=0.012..1.820 rows=39 loops=1)
+         Filter: ((car_id = 42) AND ((result)::text = 'fail'::text))
+         Rows Removed by Filter: 19961
+         Buffers: shared hit=167
+ Planning:
+   Buffers: shared hit=94
+ Planning Time: 0.313 ms
+ Execution Time: 1.886 ms
+(12 rows)
+
