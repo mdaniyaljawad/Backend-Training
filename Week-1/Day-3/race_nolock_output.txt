@@ -1,0 +1,24 @@
+=== reset: offer 1 is open; Alice=buyer 1, Bob=buyer 2 (nolock) ===
+--- both buyers open a transaction and read the offer
+[A] BEGIN
+[B] BEGIN
+[A]  id | status | accepted_by 
+[A] ----+--------+-------------
+[A]   1 | open   |            
+[A] 
+[B]  id | status | accepted_by 
+[B] ----+--------+-------------
+[B]   1 | open   |            
+[B] 
+--- both saw 'open', so both decide to accept
+[A] UPDATE 1
+--- (B's UPDATE waited for A's row lock; now A commits)
+[A] COMMIT
+[B] UPDATE 1
+[B] COMMIT
+--- final state
+ id |  status  | accepted_by |  winner   
+----+----------+-------------+-----------
+  1 | accepted |           2 | Bob Buyer
+(1 row)
+

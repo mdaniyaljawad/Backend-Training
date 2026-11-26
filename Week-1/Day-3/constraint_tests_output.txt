@@ -1,0 +1,32 @@
+\set ON_ERROR_STOP off
+-- each statement below must be REJECTED
+INSERT INTO cars (dealer_id,vin,make,model,year,price) VALUES (1,'SHORTVIN','X','Y',2020,1000);            -- bad VIN
+INSERT INTO cars (dealer_id,vin,make,model,year,price) VALUES (1,'1HGCM82633A004352','X','Y',2020,1000);   -- duplicate VIN
+ERROR:  new row for relation "cars" violates check constraint "cars_vin_check"
+DETAIL:  Failing row contains (9, 1, SHORTVIN         , X, Y, 2020, 0, 1000.00, available, 2026-11-26 13:07:46.010333+00).
+ERROR:  duplicate key value violates unique constraint "cars_vin_key"
+DETAIL:  Key (vin)=(1HGCM82633A004352) already exists.
+INSERT INTO cars (dealer_id,vin,make,model,year,price) VALUES (99,'2HGCM82633A004352','X','Y',2020,1000);  -- no such dealer
+ERROR:  insert or update on table "cars" violates foreign key constraint "cars_dealer_id_fkey"
+DETAIL:  Key (dealer_id)=(99) is not present in table "dealers".
+INSERT INTO cars (dealer_id,vin,make,model,year,price) VALUES (1,'3HGCM82633A004352','X','Y',2020,-5);     -- negative price
+INSERT INTO cars (dealer_id,vin,make,model,year,price,status) VALUES (1,'4HGCM82633A004352','X','Y',2020,5,'stolen'); -- bad status
+ERROR:  new row for relation "cars" violates check constraint "cars_price_check"
+DETAIL:  Failing row contains (12, 1, 3HGCM82633A004352, X, Y, 2020, 0, -5.00, available, 2026-11-26 13:07:46.017447+00).
+INSERT INTO inspections (car_id,inspected_on,inspector_name,score,result) VALUES (1,'2026-11-05','Z',30,'pass');   -- pass with low score
+ERROR:  new row for relation "cars" violates check constraint "cars_status_check"
+DETAIL:  Failing row contains (13, 1, 4HGCM82633A004352, X, Y, 2020, 0, 5.00, stolen, 2026-11-26 13:07:46.018211+00).
+INSERT INTO inspections (car_id,inspected_on,inspector_name,score,result) VALUES (1,'2026-11-01','Z',90,'pass');   -- same car+day
+ERROR:  new row for relation "inspections" violates check constraint "inspections_check"
+DETAIL:  Failing row contains (6, 1, 2026-11-05, Z, 30, pass, null).
+ERROR:  duplicate key value violates unique constraint "inspections_car_id_inspected_on_key"
+DETAIL:  Key (car_id, inspected_on)=(1, 2026-11-01) already exists.
+INSERT INTO offers (car_id,offered_price,status,expires_at) VALUES (1,100,'accepted',now()+interval '1 day');      -- accepted w/o buyer
+INSERT INTO offers (car_id,offered_price,expires_at) VALUES (1,100,now()-interval '1 day');                        -- expires in past
+ERROR:  new row for relation "offers" violates check constraint "offers_check1"
+DETAIL:  Failing row contains (4, 1, 100.00, accepted, null, null, 2026-11-26 13:07:46.021997+00, 2026-11-27 13:07:46.021997+00).
+ERROR:  new row for relation "offers" violates check constraint "offers_check"
+DETAIL:  Failing row contains (5, 1, 100.00, open, null, null, 2026-11-26 13:07:46.023396+00, 2026-11-25 13:07:46.023396+00).
+DELETE FROM dealers WHERE id = 1;                                                                                   -- dealer still has cars
+ERROR:  update or delete on table "dealers" violates foreign key constraint "cars_dealer_id_fkey" on table "cars"
+DETAIL:  Key (id)=(1) is still referenced from table "cars".
